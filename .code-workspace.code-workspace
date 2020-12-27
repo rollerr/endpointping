@@ -1,5 +1,11 @@
 {
-    "settings": {
-        "git.ignoreLimitWarning": true
-    }
+	"folders": [
+		{
+			"path": "../tmp"
+		},
+		{
+			"path": "."
+		}
+	],
+	"remoteAuthority": "wsl+Ubuntu"
 }
