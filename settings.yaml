@@ -1,0 +1,7 @@
+endpoints:
+  s3_ipv4: ['s3.us-east-1.amazon.aws.com', '8.8.8.8']
+ping_settings:
+  icmp_count: 200
+  flood: True
+global_settings:
+  timer: 5
