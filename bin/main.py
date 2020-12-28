@@ -35,7 +35,7 @@ class ConcurrentPing():
 
 
 def load_config_file(path):
-    with open(f'{path}') as in_file:
+    with open(path) as in_file:
         return load(in_file, Loader=FullLoader)
 
 
