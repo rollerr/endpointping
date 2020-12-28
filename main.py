@@ -95,6 +95,7 @@ def main():
             else:
                 print(f'warn: {result}')
         send_to_cloudwatch(transmit_cloudwatch)
+        print('transmitted')
         sleep(ping_executor.timeout)
 
 
