@@ -133,10 +133,11 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "backcall==0.2.0",
-        "boto3==1.16.43",
-        "botocore==1.19.43",
+        "boto3==1.16.44",
+        "botocore==1.19.44",
         "chardet==4.0.0",
         "decorator==4.4.2",
+        "dnspython==2.0.0",
         "humanreadable==0.1.0",
         "ipython==7.19.0",
         "ipython-genutils==0.2.0",
@@ -148,7 +149,7 @@ setup(
         "pickleshare==0.7.5",
         "pingparsing==1.1.0",
         "prompt-toolkit==3.0.8",
-        "ptyprocess==0.6.0",
+        "ptyprocess==0.7.0",
         "pygments==2.7.3",
         "pyparsing==2.4.7",
         "python-dateutil==2.8.1",

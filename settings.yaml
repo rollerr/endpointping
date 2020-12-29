@@ -1,7 +1,10 @@
 endpoints:
   s3_ipv4: ['s3.us-east-1.amazonaws.com', '8.8.8.8']
+  dns: ['192.168.2.12', '192.168.2.246', '8.8.8.8']
 ping_settings:
   icmp_count: 200
   flood: True
 global_settings:
   timer: 5
+dns_settings:
+  hosts: ['www.google.com', 'microsoft.com']
