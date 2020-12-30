@@ -133,8 +133,8 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "backcall==0.2.0",
-        "boto3==1.16.44",
-        "botocore==1.19.44",
+        "boto3==1.16.45",
+        "botocore==1.19.45",
         "chardet==4.0.0",
         "decorator==4.4.2",
         "dnspython==2.0.0",
