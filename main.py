@@ -39,21 +39,27 @@ class ConcurrentPing():
         transmitter.count = self.icmp_count
         transmitter.ping_option = "-f" if self.flood else None
         ping_result = transmitter.ping()
-        return ping_parser.parse(ping_result).as_dict()
+        return parse_results(ping_parser.parse(ping_result).as_dict())
 
     def dns_ping(self, ip_endpoint):
         resolver = dns.resolver.Resolver()
         resolver.nameservers = [ip_endpoint]
-        results = []
-        for host in self.dns_hosts_query:
-            try:
-                results.append(resolver.resolve(host))
-            except(NXDOMAIN, Timeout):
-                print(f'warn no results on dns query. host: {host}, resolver: {ip_endpoint}')
-        print([item.response.answer for item in results])
-        print([item.response.time for item in results])
-        print(f'name server: {ip_endpoint}')
-        return results
+        host = self.dns_hosts_query[0]
+        latency = 0
+        try:
+            dns_response = resolver.resolve(host).response
+            latency = dns_response.time * 1000
+            print(dns_response.answer)
+            print(latency)
+            print(f'name server: {ip_endpoint}')
+            response = 1
+        except(NXDOMAIN, Timeout):
+            response = 0
+            print(f'warn no results on dns query. host: {host}, resolver: {ip_endpoint}')
+        metric_values = {
+            'response': response,
+            'latency': latency}
+        return {ip_endpoint: metric_values, 'ALL': metric_values}
 
 
 def load_config_file(path):
@@ -68,20 +74,24 @@ def parse_arguments():
 
 
 def parse_results(result):
-    transmitted = int(result['packet_transmit'])
-    received = int(result['packet_receive'])
-    loss = int(result['packet_loss_rate'])
-    latency = int(result['rtt_avg'])
-    destination = str(result['destination'])
-    metric_values = {
-        'transmitted_count': transmitted,
-        'received_count': received,
-        'loss': loss,
-        'latency': latency}
+    try:
+        transmitted = int(result['packet_transmit'])
+        received = int(result['packet_receive'])
+        loss = int(result['packet_loss_rate'])
+        latency = int(result['rtt_avg'])
+        destination = str(result['destination'])
+        metric_values = {
+            'transmitted_count': transmitted,
+            'result': 1,
+            'received_count': received,
+            'loss': loss,
+            'latency': latency}
+    except TypeError:  # None returned
+        metric_values = {'result':0}
     return {destination: metric_values, 'ALL': metric_values}
 
 
-def send_to_cloudwatch(transmit_cloudwatch):
+def send_to_cloudwatch(transmit_cloudwatch, service_name):
     hostname = socket.gethostname().lower()
     client = boto3.client('cloudwatch', region_name='us-east-1')
     metric_data = []
@@ -97,28 +107,31 @@ def send_to_cloudwatch(transmit_cloudwatch):
                         },
                         {
                             'Name': 'Source',
-                            'Value': hostname if destination.lower() != 'all' else 'ALL'
+                            'Value': hostname
                         }
                     ],
                     'Value': ping_metrics[value],
                 }
                 metric_data.append(temp_dict)
-    client.put_metric_data(Namespace='IPV4', MetricData=metric_data)
+    client.put_metric_data(Namespace=f'beta/ipv4/{service_name}', MetricData=metric_data)
+
+
+def process_for_cloudwatch(array, service_name):
+    transmit_cloudwatch = []
+    for result in array:
+        transmit_cloudwatch.append(result)
+    send_to_cloudwatch(transmit_cloudwatch, service_name)
 
 
 def main():
     while True:
         transmit_cloudwatch = []
         ping_executor = ConcurrentPing()
-        results = ping_executor.process_all_concurrent('dns')
-       # results = ping_executor.process_all_concurrent('ping')
-       # for result in results:
-       #     if result['packet_transmit']:
-       #         transmit_cloudwatch.append(parse_results(result))
-       #     else:
-       #         print(f'warn: {result}')
-       # send_to_cloudwatch(transmit_cloudwatch)
-       # print('transmitted')
+        dns_results = ping_executor.process_all_concurrent('dns')
+        process_for_cloudwatch(dns_results, 'dns')
+        ping_results = ping_executor.process_all_concurrent('ping')
+        process_for_cloudwatch(ping_results, 'ping')
+        print('transmitted')
         sleep(ping_executor.timeout)
 
 

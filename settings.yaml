@@ -7,4 +7,4 @@ ping_settings:
 global_settings:
   timer: 5
 dns_settings:
-  hosts: ['www.google.com', 'microsoft.com']
+  hosts: ['www.google.com']
