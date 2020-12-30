@@ -113,7 +113,7 @@ def send_to_cloudwatch(transmit_cloudwatch, service_name):
                     'Value': ping_metrics[value],
                 }
                 metric_data.append(temp_dict)
-    client.put_metric_data(Namespace=f'beta/ipv4/{service_name}', MetricData=metric_data)
+    client.put_metric_data(Namespace=f'prod/ipv4/{service_name}', MetricData=metric_data)
 
 
 def process_for_cloudwatch(array, service_name):
